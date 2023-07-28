@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TODO APP</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: blueviolet;
+        }
+
+        .outerDiv {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .outerDiv h1 {
+            color: yellowgreen;
+        }
+
+        .innerDiv {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .todoForm {
+            width: 50vw;
+            text-align: center;
+            color: white;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 30px;
+            padding: 30px 0 50px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: greenyellow;
+            border: none;
+            border-radius: 15px;
+            font-size: 15px;
+            color: blueviolet;
+
+        }
+
+        input {
+            padding: 10px;
+            border: 2px solid greenyellow;
+            border-radius: 8px;
+            width: 80%;
+        }
+
+        #todos {
+            width: 80vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background-color: rgba(1, 1, 1, 0.2);
+            margin: 20px;
+            padding: 20px;
+        }
+
+        .todo {
+            border-bottom: 2px solid blueviolet;
+        }
+
+        .title {
+            padding: 10px;
+            /* border: 1px solid white; */
+            color: white;
+            font-size: 20px;
+        }
+
+        .desc {
+            padding: 5px;
+            background-color: white;
+        }
+
+        .deleteButton {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<script>
+
+    function deleteTodo(id) {
+        fetch("http://localhost:3001/todos/" + id, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(() => {
+            console.log("Todo Deleted...");
+            const taskElement = document.getElementById("todo" + id);
+            taskElement.remove();
+        });
+    }
+
+    function getTodos(data) {
+        console.log(data);
+        parentElement = document.getElementById('todos');
+        // parentElement.innerHTML = JSON.stringify(data);
+        for (i = 0; i < data.length; i++) {
+            childElement = document.createElement("div");
+            childElement.setAttribute("class", "todo");
+            childElement.setAttribute("id", "todo" + data[i].id);
+
+            level2childElement = document.createElement("span");
+            level2childElement2 = document.createElement("span");
+            level2childElement3 = document.createElement("button");
+
+            level2childElement.innerHTML = data[i].title;
+            level2childElement.setAttribute("id", "title" + data[i].id);
+            level2childElement.setAttribute("class", "title");
+
+            level2childElement2.innerHTML = data[i].description;
+            level2childElement2.setAttribute("id", "desc" + data[i].id);
+            level2childElement2.setAttribute("class", "desc");
+
+            level2childElement3.innerHTML = "DELETE";
+            level2childElement3.setAttribute("id", "deleteButton" + data[i].id);
+            level2childElement3.setAttribute("class", "deleteButton");
+            level2childElement3.setAttribute("onclick", "deleteTodo(" + data[i].id + ")");
+
+            childElement.appendChild(level2childElement);
+            childElement.appendChild(level2childElement2);
+            childElement.appendChild(level2childElement3);
+
+            parentElement.appendChild(childElement);
+        }
+    }
+
+    function callback2(respo) {
+        respo.json().then(getTodos);
+    }
+
+    function getData() {
+        fetch("http://localhost:3001/todos", { method: "GET" }).then(callback2);
+    }
+
+
+    getData();
+
+    function parsedResponse(data) {
+        console.log(data);
+
+        parentElement = document.getElementById('todos');
+
+        childElement = document.createElement("div");
+        childElement.setAttribute("id", "todo" + data.id);
+        childElement.setAttribute("class", "todo");
+
+        level2childElement = document.createElement("span");
+        level2childElement2 = document.createElement("span");
+        level2childElement3 = document.createElement("button");
+
+        level2childElement.innerHTML = data.title;
+        level2childElement.setAttribute("id", "title" + data.id);
+        level2childElement.setAttribute("class", "title");
+
+        level2childElement2.innerHTML = data.description;
+        level2childElement2.setAttribute("id", "desc" + data.id);
+        level2childElement2.setAttribute("class", "desc");
+
+        level2childElement3.innerHTML = "DELETE";
+        level2childElement3.setAttribute("id", "deleteButton" + data.id);
+        level2childElement3.setAttribute("class", "deleteButton");
+        level2childElement3.setAttribute("onclick", "deleteTodo(" + data.id + ")");
+
+        childElement.appendChild(level2childElement);
+        childElement.appendChild(level2childElement2);
+        childElement.appendChild(level2childElement3);
+        parentElement.appendChild(childElement);
+
+    }
+
+    function callback(resp) {
+        resp.json().then(parsedResponse);
+    }
+
+    function onPress() {
+        title = document.getElementById('title').value;
+        description = document.getElementById('description').value;
+
+        fetch("http://localhost:3001/todos", {
+            method: "POST",
+            body: JSON.stringify({
+                "title": title,
+                "description": description
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }).then(callback);
+    }
+</script>
+
+<body>
+    <div class="outerDiv">
+        <h1>TODO APP</h1>
+        <div class="innerDiv">
+            <div class="todoForm">
+                <h3> Title</h3>
+                <input type="text" id="title">
+                <h3> Description</h3>
+                <input type="text" id="description">
+
+                <br><br>
+
+                <button onclick="onPress()"> Send Todos </button>
+            </div>
+        </div>
+
+        <div id="todos"></div>
+    </div>
+</body>
+
+</html>
